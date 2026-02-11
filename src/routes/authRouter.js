@@ -16,7 +16,7 @@ authRouter.post('/register', async (req,res) => {
     const token = jwt.sign({
         id: user._id,
         email: user.email
-    },process.env.JWT_SECRET);
+    },process.env.JWT_SECRET, {expiresIn: "1h"});
 
     res.cookie("jwt_token", token);
 
@@ -27,8 +27,17 @@ authRouter.post('/register', async (req,res) => {
     })
 })
 
-authRouter.get('/protected', async(req,res) => {
-    console.log(req.cookies);
+authRouter.get('/getme', async(req,res) => {
+    const token = req.cookies.jwt_token;
+    console.log(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decoded);
+    const user = await userModel.findById(decoded.id);
+    res.json({
+        name: user.name,
+        email: user.email
+    })
+
 })
 
 authRouter.post('/login', async (req,res) => {
@@ -50,7 +59,7 @@ authRouter.post('/login', async (req,res) => {
 
     const token = jwt.sign({
         id: user._id
-    },process.env.JWT_SECRET);
+    },process.env.JWT_SECRET, {expiresIn: "1h"});
 
     res.cookie("jwt_token", token);
 
